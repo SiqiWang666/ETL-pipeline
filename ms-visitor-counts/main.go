@@ -36,6 +36,9 @@ func main() {
 
 	var err error
 
+	// For test only
+	//LogStore.db, err = sql.Open("sqlite3", "../monolith/ETL.db")
+
 	LogStore.db, err = sql.Open("sqlite3", "../ETL.db")
 	if err != nil {
 		log.Fatal(err)
@@ -43,7 +46,6 @@ func main() {
 	defer LogStore.db.Close()
 
 	// init database
-	// todo check table in the database
 	LogStore.dbInit()
 
 	// Define routes

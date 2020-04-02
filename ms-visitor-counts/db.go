@@ -16,36 +16,33 @@ type Row struct {
 	Value int
 }
 
-//TODO insert extra column: name of the file as key
-
 //StoreValue stores a key and value in a database
-//TODO refactor store value
-func (d *Database) StoreValue(key string, value int) error {
+func (d *Database) StoreValue(fname string, key string, value int) bool {
 
 	sqlStmt := `
-	INSERT INTO SampleTable (key, value)
-	VALUES (?,?)
+	INSERT INTO Visitors (Fname, key, Counts)
+	VALUES (?,?,?)
 	`
 	statement, err := d.db.Prepare(sqlStmt)
 	if err != nil {
 		log.Println(err)
-		return err
+		return false
 	}
 
-	_, err = statement.Exec(key, value)
+	_, err = statement.Exec(fname, key, value)
 	if err != nil {
 		log.Println("Failed to execute sql", err)
-		return err
+		return false
 	}
 
-	return nil
-
+	return true
 }
 
-//fetchData allows you to fetch data from db.
-//TODO refactor fetch values
+//fetchData allows you to fetch visitor counts of a file.
 func (d *Database) fetchValues(fname string) ([]Row, error) {
-	rows, err := d.db.Query("SELECT * FROM SampleTable ")
+	// fetch values from database
+	rows, err := d.db.Query("SELECT key, Counts FROM Visitors WHERE Fname='" + fname + "'")
+
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -64,16 +61,45 @@ func (d *Database) fetchValues(fname string) ([]Row, error) {
 	return rs, nil
 }
 
+func (d *Database) fetchLog(fname string) (LogFile, error) {
+	lf := LogFile{}
+	rows, err := d.db.Query("SELECT * FROM logs where name='" + fname + "'")
+	if err != nil {
+		log.Println(err)
+		return lf, err
+	}
+
+	for rows.Next() {
+		logLine := LogLine{}
+		err := rows.Scan(&logLine.Name,
+			&logLine.RawLog,
+			&logLine.RemoteAddr,
+			&logLine.TimeLocal,
+			&logLine.RequestType,
+			&logLine.RequestPath,
+			&logLine.Status,
+			&logLine.BodyBytesSent,
+			&logLine.HTTPReferer,
+			&logLine.HTTPUserAgent,
+			&logLine.Created)
+		if err != nil {
+			log.Println("Failed to fetch data from table logs: ", err)
+			return lf, err
+		}
+		lf.Logs = append(lf.Logs, logLine)
+	}
+	return lf, nil
+}
+
 //dbinit function will create a table for use for this microservice.
-//Change this to include the table you need for your service
-//TODO refactor init func
 func (d *Database) dbInit() {
 
 	//create browser table
 	sqlStmt := `
-	CREATE TABLE IF NOT EXISTS SampleTable (
-		key TEXT,
-		VALUE int
+	CREATE TABLE IF NOT EXISTS Visitors (
+		Fname text,
+		key text,
+		Counts int
 		)
 	`
 
