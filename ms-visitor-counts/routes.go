@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/gorilla/mux"
 )
+
+// Deprecated
 
 // VisitorCountsReq defines the body of POST request
 type VisitorCountsReq struct {
@@ -28,8 +28,8 @@ func VisitorHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//Call db.go func
-	// Fetch log line from `logs` of the log file
-	lf, err := LogStore.fetchLog(requestBody.Fname)
+	// Fetch log line from `logs` table
+	lf, err := LogStore.fetchLog()
 	if err != nil {
 		e := NewError(http.StatusBadRequest, err.Error())
 		http.Error(w, e.json, http.StatusBadRequest)
@@ -69,7 +69,7 @@ func VisitorHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for k, v := range visitorCounts {
-		if !LogStore.StoreValue(requestBody.Fname, k, v) {
+		if !LogStore.StoreValue(k, v) {
 			log.Println("Failed to store ", k)
 			return
 		}
@@ -83,15 +83,15 @@ func VisitorHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, jOut)
 }
 
-// FetchVisitorHandler handles GET request, route /visitor/counts/{fname}
+// FetchVisitorHandler handles GET request, route /visitor/counts
 func FetchVisitorHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("FetchVisitorHandler route is processing the request")
 
 	//Get parameter: fname
-	params := mux.Vars(r)
-	fname := params["fname"]
+	// params := mux.Vars(r)
+	// fname := params["fname"]
 	//Call db.go func
-	vc, err := LogStore.fetchValues(fname)
+	vc, err := LogStore.fetchValues()
 
 	if err != nil {
 		e := NewError(http.StatusBadRequest, err.Error())
@@ -100,7 +100,7 @@ func FetchVisitorHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(vc) < 1 {
-		e := NewError(http.StatusNotFound, "File "+fname+" not found!")
+		e := NewError(http.StatusNotFound, "Log files are not found!")
 		http.Error(w, e.json, http.StatusBadRequest)
 	}
 

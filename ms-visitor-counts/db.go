@@ -17,11 +17,11 @@ type Row struct {
 }
 
 //StoreValue stores a key and value in a database
-func (d *Database) StoreValue(fname string, key string, value int) bool {
+func (d *Database) StoreValue(key string, value int) bool {
 
 	sqlStmt := `
-	INSERT INTO Visitors (Fname, key, Counts)
-	VALUES (?,?,?)
+	INSERT INTO Visitors (Date, Counts)
+	VALUES (?,?)
 	`
 	statement, err := d.db.Prepare(sqlStmt)
 	if err != nil {
@@ -29,7 +29,7 @@ func (d *Database) StoreValue(fname string, key string, value int) bool {
 		return false
 	}
 
-	_, err = statement.Exec(fname, key, value)
+	_, err = statement.Exec(key, value)
 	if err != nil {
 		log.Println("Failed to execute sql", err)
 		return false
@@ -38,10 +38,10 @@ func (d *Database) StoreValue(fname string, key string, value int) bool {
 	return true
 }
 
-//fetchData allows you to fetch visitor counts of a file.
-func (d *Database) fetchValues(fname string) ([]Row, error) {
+//fetchData allows you to fetch visitor counts of all log files.
+func (d *Database) fetchValues() ([]Row, error) {
 	// fetch values from database
-	rows, err := d.db.Query("SELECT key, Counts FROM Visitors WHERE Fname='" + fname + "'")
+	rows, err := d.db.Query("SELECT * FROM Visitors")
 
 	if err != nil {
 		log.Println(err)
@@ -61,9 +61,10 @@ func (d *Database) fetchValues(fname string) ([]Row, error) {
 	return rs, nil
 }
 
-func (d *Database) fetchLog(fname string) (LogFile, error) {
+//fetchLog allows you to fetch list of log lines of a file
+func (d *Database) fetchLog() (LogFile, error) {
 	lf := LogFile{}
-	rows, err := d.db.Query("SELECT * FROM logs where name='" + fname + "'")
+	rows, err := d.db.Query("SELECT * FROM logs")
 	if err != nil {
 		log.Println(err)
 		return lf, err
@@ -93,12 +94,10 @@ func (d *Database) fetchLog(fname string) (LogFile, error) {
 
 //dbinit function will create a table for use for this microservice.
 func (d *Database) dbInit() {
-
-	//create browser table
+	//create visitors table
 	sqlStmt := `
 	CREATE TABLE IF NOT EXISTS Visitors (
-		Fname text,
-		key text,
+		Date text,
 		Counts int
 		)
 	`

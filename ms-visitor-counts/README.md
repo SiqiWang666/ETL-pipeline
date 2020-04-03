@@ -2,14 +2,25 @@
 This service is responsible for visitor counts related operation.
 
 # RESTful API
-- `POST /visitor/counts`
+- `POST /visitor/counts`, Update visitor counts based on all data in the database
 
-  schema: "content-type": "application/json"
+  Example request:
+  ```bash
+  curl --location --request POST 'http://localhost:4005/visitor/counts' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+	
+  }'
+  ```
 
-- `GET /visitor/counts/{fname}`
+- `GET /visitor/counts/{fname}`, Reade visitor counts
 
-# Database Design (Visistors Table)
+  Example request:
+  ```bash
+  curl --location --request GET 'http://localhost:4005/visitor/counts'
+  ```
+# Sample Visistors Table
 
-| fname | key | value |
+| Date | counts |
 |---|---|---|
-| log.txt| "03-02-2017" | 19|
+| "03-02-2017" | 19|
