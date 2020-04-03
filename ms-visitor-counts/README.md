@@ -13,7 +13,7 @@ This service is responsible for visitor counts related operation.
   }'
   ```
 
-- `GET /visitor/counts/{fname}`, Reade visitor counts
+- `GET /visitor/counts`, Read visitor counts
 
   Example request:
   ```bash
@@ -21,6 +21,6 @@ This service is responsible for visitor counts related operation.
   ```
 # Sample Visistors Table
 
-| Date | counts |
+| Date | Counts |
 |---|---|---|
 | "03-02-2017" | 19|
