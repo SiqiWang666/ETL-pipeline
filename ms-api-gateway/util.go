@@ -38,7 +38,7 @@ func runPipeline(fname string) map[string]bool {
 }
 
 func countBrowser(fname string) bool {
-	requestBody, err := json.Marshal(map[string]string {
+	requestBody, err := json.Marshal(map[string]string{
 		"fname": fname,
 	})
 	if err != nil {
@@ -46,7 +46,7 @@ func countBrowser(fname string) bool {
 		return false
 	}
 
-	url := "http://localhost:" + viper.GetString("services.ms-browser-count") + "/browsercount"
+	url := "http://localhost:" + viper.GetString("services.ms-browser-count") + "/browser/count"
 
 	log.Println("Posting URL: ", url, " with ", string(requestBody))
 	//make request to ms
@@ -59,8 +59,10 @@ func countBrowser(fname string) bool {
 
 	//decode reesponse body
 	var result map[string]interface{}
+
 	// var result Response
 	err = json.NewDecoder(resp.Body).Decode(&result)
+
 	if err != nil {
 		log.Println("Error decoding json:", err)
 		return false

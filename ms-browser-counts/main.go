@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
@@ -48,5 +49,8 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/browsercount", handleBrowserCount).Methods("GET")
+	r.HandleFunc("/browser/count", BrowserCount).Methods("POST")
+	r.HandleFunc("/lines/count/{fname}", handleBrowserCount).Methods("GET")
+	log.Println("Listening on: ", viper.GetString("services."+ServiceName))
+	log.Fatal(http.ListenAndServe(":"+viper.GetString("services."+ServiceName), r))
 }
