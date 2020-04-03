@@ -44,7 +44,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer LogStroe.db.Close()
+	defer LogStore.db.Close()
 
 	r := mux.NewRouter()
 

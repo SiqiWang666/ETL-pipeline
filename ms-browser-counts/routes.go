@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	// "io/ioutil"
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
-	"github.com/spf13/viper"
+	// "github.com/gorilla/mux"
+	// "github.com/spf13/viper"
 )
 
 func handleBrowserCount(w http.ResponseWriter, r *http.Request) {

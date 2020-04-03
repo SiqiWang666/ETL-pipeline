@@ -5,6 +5,14 @@ import (
 	"log"
 )
 
+//BrowserCountRow represents a row in the database for browser counts
+type BrowserCountRow struct {
+	Key     string
+	Date    string
+	Browser string
+	Count   int
+}
+
 //Database controls database functionality
 type Database struct {
 	db *sql.DB
