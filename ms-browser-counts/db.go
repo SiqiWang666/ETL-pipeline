@@ -20,31 +20,39 @@ type Database struct {
 
 //storeBrowserCount stores the count for browsers in logs by date
 func (d *Database) storeBrowserCount(key string, dt string, b string, c int) error {
-	// result, err := d.db.Query("SELECT * FROM browsers WHERE browsers.browser = '" + b + "'")
+	// rows, err := d.db.Query("SELECT * FROM browsers WHERE browser = '" + b + "'")
+	// defer rows.Close()
+
 	// if err != nil {
 	// 	log.Println("Error query wrong...", err)
 	// 	return err
 	// }
-	// if result.Next() {
-	// 	sqlStmt := `
-	// 	UPDATE browsers
-	// 	SET count = ?
-	// 	WHERE browser = ?`
-
-	// 	statement, err := d.db.Prepare(sqlStmt)
-	// 	if err != nil {
-	// 		log.Println("Error cannot prepare update code", err)
-	// 		return err
-	// 	}
-	// 	_, err = statement.Exec(c, b)
-	// 	if err != nil {
-	// 		log.Println("Error cannot run update code", err)
-	// 		return err
-	// 	}
-	// 	return nil
-	// }
 
 	sqlStmt := `
+		UPDATE browsers
+		SET count = ?
+		WHERE browser = ?`
+
+	statement, err := d.db.Prepare(sqlStmt)
+	if err != nil {
+		log.Println("Error cannot prepare update code", err)
+		return err
+	}
+	res, err := statement.Exec(c, b)
+	if err != nil {
+		log.Println("Error cannot run update code", err)
+		return err
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		log.Println("Error checking effect", err)
+		return err
+	}
+	if affect != 0 {
+		return nil
+	}
+
+	sqlStmt = `
 	INSERT INTO browsers (
 		key,
 		date,
@@ -52,7 +60,7 @@ func (d *Database) storeBrowserCount(key string, dt string, b string, c int) err
 		count
 		) VALUES (?,?,?,?)
 	`
-	statement, err := d.db.Prepare(sqlStmt)
+	statement, err = d.db.Prepare(sqlStmt)
 	if err != nil {
 		log.Println("Error cannot prepare insert code", err)
 		return err
