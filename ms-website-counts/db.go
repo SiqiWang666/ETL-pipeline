@@ -6,10 +6,9 @@ import (
 )
 
 //BrowserCountRow represents a row in the database for browser counts
-type BrowserCountRow struct {
+type WebsiteCountRow struct {
 	Key     string
-	Date    string
-	Browser string
+	Website string
 	Count   int
 }
 
@@ -18,31 +17,25 @@ type Database struct {
 	db *sql.DB
 }
 
-//storeBrowserCount stores the count for browsers in logs by date
-func (d *Database) storeBrowserCount(key string, dt string, b string, c int) error {
-	// rows, err := d.db.Query("SELECT * FROM browsers WHERE browser = '" + b + "'")
-	// defer rows.Close()
-
-	// if err != nil {
-	// 	log.Println("Error query wrong...", err)
-	// 	return err
-	// }
-
+//storeWebsiteCount stores the count for browsers in logs by date
+func (d *Database) storeWebsiteCount(key string, w string, c int) error {
+	// check if the website had already been stored
 	sqlStmt := `
-		UPDATE browsers
+		UPDATE websites
 		SET count = count + ?
-		WHERE browser = ?`
-
+		WHERE website = ?
+		`
 	statement, err := d.db.Prepare(sqlStmt)
 	if err != nil {
 		log.Println("Error cannot prepare update code", err)
 		return err
 	}
-	res, err := statement.Exec(c, b)
+	res, err := statement.Exec(c, w)
 	if err != nil {
 		log.Println("Error cannot run update code", err)
 		return err
 	}
+	// if nothing
 	affect, err := res.RowsAffected()
 	if err != nil {
 		log.Println("Error checking effect", err)
@@ -53,12 +46,11 @@ func (d *Database) storeBrowserCount(key string, dt string, b string, c int) err
 	}
 
 	sqlStmt = `
-	INSERT INTO browsers (
+	INSERT INTO websites (
 		key,
-		date,
-		browser,
+		website,
 		count
-		) VALUES (?,?,?,?)
+		) VALUES (?,?,?)
 	`
 	statement, err = d.db.Prepare(sqlStmt)
 	if err != nil {
@@ -66,7 +58,7 @@ func (d *Database) storeBrowserCount(key string, dt string, b string, c int) err
 		return err
 	}
 
-	_, err = statement.Exec(key, dt, b, c)
+	_, err = statement.Exec(key, w, c)
 
 	if err != nil {
 		log.Println("Error cannot run insert code", err)
@@ -75,23 +67,23 @@ func (d *Database) storeBrowserCount(key string, dt string, b string, c int) err
 	return nil
 }
 
-func (d *Database) fetchBrowserData() ([]BrowserCountRow, error) {
+func (d *Database) fetchWebsiteData() ([]WebsiteCountRow, error) {
 
-	sqlStmt := "SELECT * from browsers"
+	sqlStmt := "SELECT * from websites"
 	rows, err := d.db.Query(sqlStmt)
 	if err != nil {
-		log.Println("Failed to fetch browser data: ", err)
+		log.Println("Failed to fetch website data: ", err)
 		return nil, err
 	}
 
-	browserStats := []BrowserCountRow{}
+	websiteStats := []WebsiteCountRow{}
 
 	for rows.Next() {
-		bcr := BrowserCountRow{}
-		rows.Scan(&bcr.Key, &bcr.Date, &bcr.Browser, &bcr.Count)
-		browserStats = append(browserStats, bcr)
+		wcr := WebsiteCountRow{}
+		rows.Scan(&wcr.Key, &wcr.Website, &wcr.Count)
+		websiteStats = append(websiteStats, wcr)
 	}
-	return browserStats, nil
+	return websiteStats, nil
 }
 
 //fetchData allows you to fetch log data from db.
@@ -128,10 +120,9 @@ func (d *Database) dbInit() {
 
 	//create browser table
 	sqlStmt := `
-	CREATE TABLE IF NOT EXISTS browsers (
+	CREATE TABLE IF NOT EXISTS websites (
 		key TEXT,
-		date TEXT,
-		browser TEXT,
+		website TEXT,
 		count int
 		)
 	`

@@ -66,11 +66,6 @@ func handleCountBrowsers(w http.ResponseWriter, r *http.Request) {
 	visitTimes := []time.Time{}
 	browsers := []string{}
 
-	lf, e := LogStore.fetchData(BCR.FName)
-	if e != nil {
-		log.Println("Error bad request...")
-		return
-	}
 	for _, v := range lf.Logs {
 		browsers = append(browsers, parseBrowser(v.HTTPUserAgent))
 		v.TimeLocal = strings.Replace(v.TimeLocal, "[", "", -1)

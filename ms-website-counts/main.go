@@ -11,13 +11,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-//LogStore is a database connection
+// LogStore is a database conenction
 var LogStore Database
 
-//ServiceName is the name of this service. It will match the service in the config file.
+// ServiceName is the name of this service.
 var ServiceName string
 
-//ReadConfig reads the config from a file
+// ReadConfig reads the config from a file
 func ReadConfig() {
 	// Set the file name of the configurations file
 	viper.SetConfigName("config")
@@ -32,35 +32,26 @@ func ReadConfig() {
 }
 
 func main() {
+	ServiceName = "ms-website-counts"
 
-	//DEFINE THE SERVICE NAME. CHANGE THIS TO MATCH A LINE IN CONFIG FILE
-	ServiceName = "ms-api-gateway"
-
-	//Start DB connection
 	LogStore = Database{}
 
-	//read config from file using viper.
 	ReadConfig()
 
 	var err error
 
-	//Open/Create the DB file for data storage
 	LogStore.db, err = sql.Open("sqlite3", "../ETL.db")
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer LogStore.db.Close()
-
-	//Create table if not found
+	//init database
 	LogStore.dbInit()
 
-	//Define routes.
 	r := mux.NewRouter()
-	r.HandleFunc("/lines/count/{fname}", handleLinesCount).Methods("GET")
-	r.HandleFunc("/browser/count/{fname}", handleBrowserCount).Methods("GET")
+	r.HandleFunc("/website/count", handleCountWebsites).Methods("POST")
 	r.HandleFunc("/website/count/{fname}", handleWebsiteCount).Methods("GET")
-	r.HandleFunc("/", handleServeUploadPage)
-	r.HandleFunc("/upload/log", handleUploadLog)
 	log.Println("Listening on: ", viper.GetString("services."+ServiceName))
 	log.Fatal(http.ListenAndServe(":"+viper.GetString("services."+ServiceName), r))
 }
