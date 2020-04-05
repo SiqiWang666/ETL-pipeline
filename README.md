@@ -4,6 +4,9 @@ Mingyu Ma & Siqi Wang & Weizhao Li
 
 Contribution:
 Weizhao Li: MS - Data - Cleaning
+Siqi Wang: MS-Visitor-Counts
+Mingyu Ma: MS-Website-Counts/MS-Browser-Counts
+
 
 
 Message format

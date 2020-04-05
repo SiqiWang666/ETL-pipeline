@@ -51,7 +51,7 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/website/count", handleCountWebsites).Methods("POST")
-	r.HandleFunc("/website/count/{fname}", handleWebsiteCount).Methods("GET")
+	r.HandleFunc("/website/count", handleWebsiteCount).Methods("GET")
 	log.Println("Listening on: ", viper.GetString("services."+ServiceName))
 	log.Fatal(http.ListenAndServe(":"+viper.GetString("services."+ServiceName), r))
 }

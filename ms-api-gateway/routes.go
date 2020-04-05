@@ -16,11 +16,11 @@ import (
 //handleBrowserCount handles fetching line counts
 func handleBrowserCount(w http.ResponseWriter, r *http.Request) {
 
-	//fetch parameters from url
-	params := mux.Vars(r)
+	// //fetch parameters from url
+	// params := mux.Vars(r)
 
-	fname := params["fname"]
-	url := "http://localhost:" + viper.GetString("services.ms-browser-counts") + "/browser/count/" + fname
+	// fname := params["fname"]
+	url := "http://localhost:" + viper.GetString("services.ms-browser-counts") + "/browser/count"
 
 	log.Println("Fetching URL: ", url)
 	//make request to ms
@@ -56,11 +56,11 @@ func handleBrowserCount(w http.ResponseWriter, r *http.Request) {
 //handleWebsiteCount handles fetching line counts
 func handleWebsiteCount(w http.ResponseWriter, r *http.Request) {
 
-	//fetch parameters from url
-	params := mux.Vars(r)
+	// //fetch parameters from url
+	// params := mux.Vars(r)
 
-	fname := params["fname"]
-	url := "http://localhost:" + viper.GetString("services.ms-website-counts") + "/website/count/" + fname
+	// fname := params["fname"]
+	url := "http://localhost:" + viper.GetString("services.ms-website-counts") + "/website/count"
 
 	log.Println("Fetching URL: ", url)
 	//make request to ms
