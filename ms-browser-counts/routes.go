@@ -8,8 +8,6 @@ import (
 
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 type BrowserCountRequest struct {
@@ -38,7 +36,7 @@ func parseTime(t string) time.Time {
 	return tm
 }
 
-func BrowserCount(w http.ResponseWriter, r *http.Request) {
+func handleCountBrowsers(w http.ResponseWriter, r *http.Request) {
 	log.Println("Handling Browser Counts")
 	//object for body
 	var BCR BrowserCountRequest
@@ -92,7 +90,6 @@ func BrowserCount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for b, v := range browserCounts {
-
 		keyPieces := strings.Split(b, "_")
 		if LogStore.storeBrowserCount(b, keyPieces[1], keyPieces[0], v) != nil {
 			log.Println("Failed to store ", b)
@@ -111,11 +108,11 @@ func BrowserCount(w http.ResponseWriter, r *http.Request) {
 func handleBrowserCount(w http.ResponseWriter, r *http.Request) {
 
 	//fetch parameters from url
-	params := mux.Vars(r)
+	// params := mux.Vars(r)
 
-	fname := params["fname"]
+	// fname := params["fname"]
 
-	browserData, e := LogStore.fetchBrowserData(fname)
+	browserData, e := LogStore.fetchBrowserData()
 	if e != nil {
 		log.Println("Error fetching data...")
 		return

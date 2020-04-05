@@ -46,7 +46,7 @@ func countBrowser(fname string) bool {
 		return false
 	}
 
-	url := "http://localhost:" + viper.GetString("services.ms-browser-count") + "/browser/count"
+	url := "http://localhost:" + viper.GetString("services.ms-browser-counts") + "/browser/count"
 
 	log.Println("Posting URL: ", url, " with ", string(requestBody))
 	//make request to ms
@@ -59,10 +59,8 @@ func countBrowser(fname string) bool {
 
 	//decode reesponse body
 	var result map[string]interface{}
-
 	// var result Response
 	err = json.NewDecoder(resp.Body).Decode(&result)
-
 	if err != nil {
 		log.Println("Error decoding json:", err)
 		return false

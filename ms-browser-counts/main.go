@@ -46,10 +46,11 @@ func main() {
 		log.Fatal(err)
 	}
 	defer LogStore.db.Close()
+	//init database
+	LogStore.dbInit()
 
 	r := mux.NewRouter()
-
-	r.HandleFunc("/browser/count", BrowserCount).Methods("POST")
+	r.HandleFunc("/browser/count", handleCountBrowsers).Methods("POST")
 	r.HandleFunc("/lines/count/{fname}", handleBrowserCount).Methods("GET")
 	log.Println("Listening on: ", viper.GetString("services."+ServiceName))
 	log.Fatal(http.ListenAndServe(":"+viper.GetString("services."+ServiceName), r))

@@ -20,6 +20,30 @@ type Database struct {
 
 //storeBrowserCount stores the count for browsers in logs by date
 func (d *Database) storeBrowserCount(key string, dt string, b string, c int) error {
+	// result, err := d.db.Query("SELECT * FROM browsers WHERE browsers.browser = '" + b + "'")
+	// if err != nil {
+	// 	log.Println("Error query wrong...", err)
+	// 	return err
+	// }
+	// if result.Next() {
+	// 	sqlStmt := `
+	// 	UPDATE browsers
+	// 	SET count = ?
+	// 	WHERE browser = ?`
+
+	// 	statement, err := d.db.Prepare(sqlStmt)
+	// 	if err != nil {
+	// 		log.Println("Error cannot prepare update code", err)
+	// 		return err
+	// 	}
+	// 	_, err = statement.Exec(c, b)
+	// 	if err != nil {
+	// 		log.Println("Error cannot run update code", err)
+	// 		return err
+	// 	}
+	// 	return nil
+	// }
+
 	sqlStmt := `
 	INSERT INTO browsers (
 		key,
@@ -30,22 +54,22 @@ func (d *Database) storeBrowserCount(key string, dt string, b string, c int) err
 	`
 	statement, err := d.db.Prepare(sqlStmt)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error cannot prepare insert code", err)
 		return err
 	}
 
 	_, err = statement.Exec(key, dt, b, c)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Error cannot run insert code", err)
 		return err
 	}
 	return nil
 }
 
-func (d *Database) fetchBrowserData(fname string) ([]BrowserCountRow, error) {
+func (d *Database) fetchBrowserData() ([]BrowserCountRow, error) {
 
-	sqlStmt := "SELECT * from browsers where key ='" + fname + "'"
+	sqlStmt := "SELECT * from browsers"
 	rows, err := d.db.Query(sqlStmt)
 	if err != nil {
 		log.Println("Failed to fetch browser data: ", err)
