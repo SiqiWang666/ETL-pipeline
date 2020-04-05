@@ -14,8 +14,8 @@ type WebsiteCountRequest struct {
 }
 
 func parseWebsite(url string) string {
-	temp := url[7:]
-	result := strings.Split(temp, "/")
+	temp := strings.Split(url, "//")
+	result := strings.Split(temp[1], "/")
 	return result[0]
 }
 
@@ -54,13 +54,14 @@ func handleCountWebsites(w http.ResponseWriter, r *http.Request) {
 		// log.Printf(v.HTTPReferer)
 		website := parseWebsite(v.HTTPReferer)
 		if _, ok := websiteCounts[website]; !ok {
-			websiteCounts[website] = 1
+			websiteCounts[website] = 0
 		}
 		websiteCounts[website]++
 	}
 
 	for b, v := range websiteCounts {
 		key := WCR.FName + "_" + b
+		// log.Printf(b)
 		if LogStore.storeWebsiteCount(key, b, v) != nil {
 			log.Println("Failed to store ", b)
 		}
