@@ -1,5 +1,9 @@
 
+Team Members:
+Mingyu Ma & Siqi Wang & Weizhao Li
 
+Contribution:
+Weizhao Li: MS - Data - Cleaning
 
 
 Message format
