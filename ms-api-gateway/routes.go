@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 
+	"./services"
+
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 )
@@ -83,8 +85,16 @@ func handleUploadLog(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//clean log file and store in db
-	processLogFile(fileBytes, handler.Filename)
+	// We call data clean before running the pipeline
+	//Currently, processLogFile method is in ms-data-cleaning. To trigger processLogFile, we need to call CleanData which would 
+	//connect to ms-data-cleaning, then the route of ms-data-cleaning would call handleRoute which contains processLogFile method.
+	var resDc bool = services.DataCleaningService().CleanData(fileBytes, handler.Filename)
+	// processLogFile(fileBytes, handler.Filename)
+	//
+
 	result := runPipeline(handler.Filename)
+	result["Data Cleaner"] = resDc
+
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "<h1>Pipeline Status</h1>")
 	fmt.Fprintf(w, "Log File Uploaded Successfully<br>")
