@@ -1,17 +1,98 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	"github.com/gwAdvNet20/etl-pipeline-mingyu_siqi_weizhao/ms-api-gateway/services"
-
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 )
+
+//Data cleaning related
+type BasicService interface {
+	sender() bool
+}
+
+type Service struct {
+	url string
+}
+
+//Data cleaning related
+func (s *Service) Post(requestBody []byte) (map[string]interface{}, error) {
+	resp, err := http.Post(s.url, "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		log.Println("Error making post request to ", s.url, ": ", err)
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+
+	if err != nil {
+		log.Println("Error decoding json:", err)
+		return nil, err
+	}
+
+	resp.Body.Close()
+	return result, nil
+
+}
+
+//Data cleaning related
+type DataCleaning struct {
+	host        string
+	serviceName string
+	Service
+}
+
+//Data cleaning related
+func DataCleaningService() *DataCleaning {
+	return &DataCleaning{
+		host:        "http://localhost:",
+		serviceName: viper.GetString("services.ms-data-cleaning"),
+	}
+}
+
+//Data cleaning related, call "/data/clean" to clean the data.
+//It will trigger the microservice - data- cleaning to do that
+func (dc *DataCleaning) CleanData(rawLogFile []byte, fname string) bool {
+	requestBody, err := json.Marshal(map[string]string{
+		"rawLogFile": string(rawLogFile),
+		"fname":      fname,
+	})
+
+	if err != nil {
+		log.Println("Error parsing CleanData request body:", requestBody)
+		return false
+	}
+
+	dc.url = dc.genUrl("/data/clean")
+	result, err := dc.Post(requestBody)
+	if err != nil {
+		return false
+	}
+
+	if result["statusCode"].(float64) > 300 {
+		log.Println("Error", result["error"].(string))
+		return false
+	}
+
+	log.Println("Data Clean completed")
+	return true
+
+}
+
+//Data cleaning related
+func (dc *DataCleaning) genUrl(path string) string {
+	return dc.host + dc.serviceName + path
+}
 
 //handleBrowserCount handles fetching line counts
 func handleBrowserCount(w http.ResponseWriter, r *http.Request) {
@@ -207,7 +288,7 @@ func handleUploadLog(w http.ResponseWriter, r *http.Request) {
 	// We call data clean before running the pipeline
 	//Currently, processLogFile method is in ms-data-cleaning. To trigger processLogFile, we need to call CleanData which would
 	//connect to ms-data-cleaning, then the route of ms-data-cleaning would call handleRoute which contains processLogFile method.
-	var resDc bool = services.DataCleaningService().CleanData(fileBytes, handler.Filename)
+	var resDc bool = DataCleaningService().CleanData(fileBytes, handler.Filename)
 	// processLogFile(fileBytes, handler.Filename)
 	//
 
