@@ -58,8 +58,8 @@ func main() {
 	r := mux.NewRouter()
 
 	//Define your routes here. You may need to add more routes here.
-	r.HandleFunc("/route", handleRoute).Methods("POST")
-	r.HandleFunc("/route/with/{PARAM_NAME}", handleRouteParameter).Methods("GET")
+	r.HandleFunc("/data/clean", handleDataClean).Methods("POST")
+	// r.HandleFunc("/route/with/{PARAM_NAME}", handleRouteParameter).Methods("GET")
 
 	//Serve the webserver. You should not change this
 	log.Println("Listening on: ", viper.GetString("services."+ServiceName))
