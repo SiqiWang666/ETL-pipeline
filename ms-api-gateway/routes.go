@@ -13,6 +13,86 @@ import (
 	"github.com/spf13/viper"
 )
 
+//handleBrowserCount handles fetching line counts
+func handleBrowserCount(w http.ResponseWriter, r *http.Request) {
+
+	//fetch parameters from url
+	params := mux.Vars(r)
+
+	fname := params["fname"]
+	url := "http://localhost:" + viper.GetString("services.ms-browser-counts") + "/browser/count/" + fname
+
+	log.Println("Fetching URL: ", url)
+	//make request to ms
+	resp, err := http.Get(url)
+	if err != nil {
+		e := NewError(http.StatusBadRequest, err.Error())
+		http.Error(w, e.json, http.StatusBadRequest)
+		return
+	}
+	defer resp.Body.Close()
+
+	//decode reesponse body
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	//if statusCode is above 300 then its an error, parse and return
+	if result["statusCode"].(float64) > 300 {
+		log.Println("Error", result["error"].(string))
+		e := NewError(http.StatusInternalServerError, result["error"].(string))
+		http.Error(w, e.json, http.StatusBadRequest)
+		return
+	}
+
+	//convert response to proper response
+	resOut := ResponseInt{int(result["statusCode"].(float64)), result["message"].(string), ConvertMapInterfaceToMapInt(result["data"])}
+	jOut, _ := resOut.JSON()
+
+	//return response to client
+	w.WriteHeader(int(result["statusCode"].(float64)))
+	fmt.Fprintf(w, jOut)
+}
+
+//handleWebsiteCount handles fetching line counts
+func handleWebsiteCount(w http.ResponseWriter, r *http.Request) {
+
+	//fetch parameters from url
+	params := mux.Vars(r)
+
+	fname := params["fname"]
+	url := "http://localhost:" + viper.GetString("services.ms-website-counts") + "/website/count/" + fname
+
+	log.Println("Fetching URL: ", url)
+	//make request to ms
+	resp, err := http.Get(url)
+	if err != nil {
+		e := NewError(http.StatusBadRequest, err.Error())
+		http.Error(w, e.json, http.StatusBadRequest)
+		return
+	}
+	defer resp.Body.Close()
+
+	//decode reesponse body
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	//if statusCode is above 300 then its an error, parse and return
+	if result["statusCode"].(float64) > 300 {
+		log.Println("Error", result["error"].(string))
+		e := NewError(http.StatusInternalServerError, result["error"].(string))
+		http.Error(w, e.json, http.StatusBadRequest)
+		return
+	}
+
+	//convert response to proper response
+	resOut := ResponseInt{int(result["statusCode"].(float64)), result["message"].(string), ConvertMapInterfaceToMapInt(result["data"])}
+	jOut, _ := resOut.JSON()
+
+	//return response to client
+	w.WriteHeader(int(result["statusCode"].(float64)))
+	fmt.Fprintf(w, jOut)
+}
+
 //handleLinesCount handles fetching line counts
 func handleLinesCount(w http.ResponseWriter, r *http.Request) {
 
