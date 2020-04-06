@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"./services"
+	"github.com/gwAdvNet20/etl-pipeline-mingyu_siqi_weizhao/ms-api-gateway/services"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
@@ -61,6 +61,45 @@ func handleWebsiteCount(w http.ResponseWriter, r *http.Request) {
 
 	fname := params["fname"]
 	url := "http://localhost:" + viper.GetString("services.ms-website-counts") + "/website/count/" + fname
+
+	log.Println("Fetching URL: ", url)
+	//make request to ms
+	resp, err := http.Get(url)
+	if err != nil {
+		e := NewError(http.StatusBadRequest, err.Error())
+		http.Error(w, e.json, http.StatusBadRequest)
+		return
+	}
+	defer resp.Body.Close()
+
+	//decode reesponse body
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	//if statusCode is above 300 then its an error, parse and return
+	if result["statusCode"].(float64) > 300 {
+		log.Println("Error", result["error"].(string))
+		e := NewError(http.StatusInternalServerError, result["error"].(string))
+		http.Error(w, e.json, http.StatusBadRequest)
+		return
+	}
+
+	//convert response to proper response
+	resOut := ResponseInt{int(result["statusCode"].(float64)), result["message"].(string), ConvertMapInterfaceToMapInt(result["data"])}
+	jOut, _ := resOut.JSON()
+
+	//return response to client
+	w.WriteHeader(int(result["statusCode"].(float64)))
+	fmt.Fprintf(w, jOut)
+}
+
+// handleVisitorCount handles fetching visitor counts
+func handleVisitorCount(w http.ResponseWriter, r *http.Request) {
+	//fetch parameters from url
+	// params := mux.Vars(r)
+
+	// fname := params["fname"]
+	url := "http://localhost:" + viper.GetString("services.ms-visitor-counts") + "/visitor/counts"
 
 	log.Println("Fetching URL: ", url)
 	//make request to ms
@@ -166,7 +205,7 @@ func handleUploadLog(w http.ResponseWriter, r *http.Request) {
 
 	//clean log file and store in db
 	// We call data clean before running the pipeline
-	//Currently, processLogFile method is in ms-data-cleaning. To trigger processLogFile, we need to call CleanData which would 
+	//Currently, processLogFile method is in ms-data-cleaning. To trigger processLogFile, we need to call CleanData which would
 	//connect to ms-data-cleaning, then the route of ms-data-cleaning would call handleRoute which contains processLogFile method.
 	var resDc bool = services.DataCleaningService().CleanData(fileBytes, handler.Filename)
 	// processLogFile(fileBytes, handler.Filename)

@@ -59,6 +59,7 @@ func main() {
 	r.HandleFunc("/lines/count/{fname}", handleLinesCount).Methods("GET")
 	r.HandleFunc("/browser/count/{fname}", handleBrowserCount).Methods("GET")
 	r.HandleFunc("/website/count/{fname}", handleWebsiteCount).Methods("GET")
+	r.HandleFunc("/visitor/counts", handleVisitorCount).Methods("GET")
 	r.HandleFunc("/", handleServeUploadPage)
 	//Trigger the data clean function microservice when gateway calls handleUploadLog
 	r.HandleFunc("/upload/log", handleUploadLog)
