@@ -58,6 +58,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/lines/count/{fname}", handleLinesCount).Methods("GET")
 	r.HandleFunc("/", handleServeUploadPage)
+	//Trigger the data clean function microservice when gateway calls handleUploadLog
 	r.HandleFunc("/upload/log", handleUploadLog)
 	log.Println("Listening on: ", viper.GetString("services."+ServiceName))
 	log.Fatal(http.ListenAndServe(":"+viper.GetString("services."+ServiceName), r))

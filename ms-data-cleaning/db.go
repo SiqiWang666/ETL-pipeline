@@ -75,3 +75,30 @@ func (d *Database) dbInit() {
 	statement, _ := d.db.Prepare(sqlStmt)
 	statement.Exec()
 }
+
+//Store stores a logfile in a database
+func (d *Database) StoreLogLine(lf LogFile) {
+
+	sqlStmt := `
+	INSERT INTO logs (name, raw_log, 
+		remote_addr,
+		time_local,
+		request_type,
+		request_path,
+		status,
+		body_bytes_sent,
+		http_referer,
+		http_user_agent,
+		created
+		) VALUES (?,?, ?,?,?,?,?,?,?,?,?)
+	`
+	statement, err := d.db.Prepare(sqlStmt)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	for _, v := range lf.Logs {
+
+		statement.Exec(v.Name, v.RawLog, v.RemoteAddr, v.TimeLocal, v.RequestType, v.RequestPath, v.Status, v.BodyBytesSent, v.HTTPReferer, v.HTTPUserAgent, v.Created)
+	}
+}

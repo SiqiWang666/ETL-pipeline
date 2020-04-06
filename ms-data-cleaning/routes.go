@@ -1,22 +1,28 @@
 package main
 
 import (
+	// "bufio"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+
+	// "strings"
+	// "strconv"
+	// "time"
 
 	"github.com/gorilla/mux"
 )
 
 //BodyStruct represents the body of a request. Add json fields below as needed
 type BodyStruct struct {
-	FName string `json:"fname"`
+	FName      string `json:"fname"`
+	RawLogFile string `json:"rawLogFile"`
 }
 
 //YOU WILL NEED TO CHANGE THIS TO THE REAL FUNCTIONALITY
 //handleRoute handles the root route
-func handleRoute(w http.ResponseWriter, r *http.Request) {
+func handleDataClean(w http.ResponseWriter, r *http.Request) {
 
 	//LOGIC for this endpoint goes here
 	//object for body
@@ -27,6 +33,12 @@ func handleRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		//return error if failure
 		log.Println("Error parsing json:", err)
+		e := NewError(http.StatusBadRequest, err.Error())
+		http.Error(w, e.json, http.StatusBadRequest)
+		return
+	}
+
+	if processLogFile(BS.RawLogFile, BS.FName) == false {
 		e := NewError(http.StatusBadRequest, err.Error())
 		http.Error(w, e.json, http.StatusBadRequest)
 		return
