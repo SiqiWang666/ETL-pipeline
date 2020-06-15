@@ -1,13 +1,18 @@
 
-Team Members:
-Mingyu Ma & Siqi Wang & Weizhao Li
-
-Contribution:
-Weizhao Li: MS - Data - Cleaning
-Siqi Wang: MS-Visitor-Counts
-Mingyu Ma: MS-Website-Counts/MS-Browser-Counts
-
-
+A server log analysis built in microservices architecture.
+```shell
+.
+├── README.md
+├── config.yaml
+├── logs
+├── monolith
+├── ms-api-gateway     # service, api gate way
+├── ms-browser-counts  # service, browser-counts
+├── ms-data-cleaning   # service, data-cleaning
+├── ms-line-count      # service, line-count
+├── ms-visitor-counts  # service, visitor-counts
+└── ms-website-counts  # service, website-counts
+```
 
 Message format
 ```
